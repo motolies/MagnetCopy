@@ -56,5 +56,19 @@ namespace MagnetCopyUI
         {
             InitializeComponent();
         }
+
+        private void chkRegistry_CheckedChanged(object sender, EventArgs e)
+        {
+            var chk = sender as CheckBox;
+
+            if (chk.Checked)
+            {
+                RegistryHelper.SetMagnet();
+            }
+            else
+            {
+                RegistryHelper.DeleteMagnet();
+            }
+        }
     }
 }

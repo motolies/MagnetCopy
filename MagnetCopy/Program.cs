@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -55,6 +56,9 @@ namespace MagnetCopy
 
                 Console.WriteLine(param);
                 SendMessage(param);
+
+                var dir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                LogHelper.WriteText(Path.Combine(dir, "log.txt"), string.Format("[{0}] {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),  param));
             }
             catch(Exception ex)
             {
@@ -62,6 +66,7 @@ namespace MagnetCopy
             }
             finally
             {
+                //Console.ReadLine();
                 Environment.Exit(0);
             }
             
