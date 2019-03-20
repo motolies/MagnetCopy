@@ -1,6 +1,6 @@
 ﻿namespace MagnetCopyUI
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// 필수 디자이너 변수입니다.
@@ -64,17 +64,17 @@
             this.chkRegistry.TabIndex = 0;
             this.chkRegistry.Text = "Magnet 등록";
             this.chkRegistry.UseVisualStyleBackColor = true;
-            this.chkRegistry.CheckedChanged += new System.EventHandler(this.chkRegistry_CheckedChanged);
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(373, 326);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.panel1);
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "MagnetCopyUI";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);

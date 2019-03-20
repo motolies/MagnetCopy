@@ -5,12 +5,16 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MagnetCopy
 {
     class Program
     {
+
+        static readonly string dir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
 
         // https://ehdrn.tistory.com/295
 
@@ -30,18 +34,39 @@ namespace MagnetCopy
 
         public static void SendMessage(string msg)
         {
-            Process[] pro = Process.GetProcessesByName("MagnetCopyUI");
-            if (pro.Length > 0)
+            List<Process> pro = Process.GetProcessesByName("MagnetCopyUI").ToList();
+            if (pro.Count < 1)
             {
-                byte[] buff = System.Text.Encoding.Default.GetBytes(msg);
+                ProcessStartInfo processStartInfo = new ProcessStartInfo
+                {
+                    FileName = Path.Combine(dir, "MagnetCopyUI.exe"),
+                };
+                Process p = new Process();
+                p.StartInfo = processStartInfo;
+                p.Start();
 
-                COPYDATASTRUCT cds = new COPYDATASTRUCT();
-                cds.dwData = IntPtr.Zero;
-                cds.cbData = buff.Length + 1;
-                cds.lpData = msg;
+                while (true)
+                {
+                    try
+                    {
+                        var time = p.StartTime;
+                        Thread.Sleep(1000);
+                        break;
+                    }
+                    catch (Exception) { }
+                }
 
-                SendMessage(pro[0].MainWindowHandle, WM_COPYDATA, 0, ref cds);
+                pro.Add(p);
             }
+
+            byte[] buff = System.Text.Encoding.Default.GetBytes(msg);
+
+            COPYDATASTRUCT cds = new COPYDATASTRUCT();
+            cds.dwData = IntPtr.Zero;
+            cds.cbData = buff.Length + 1;
+            cds.lpData = msg;
+
+            SendMessage(pro[0].MainWindowHandle, WM_COPYDATA, 0, ref cds);
         }
 
 
@@ -54,22 +79,26 @@ namespace MagnetCopy
             {
                 string param = args[0];
 
-                Console.WriteLine(param);
                 SendMessage(param);
+                LogWrite(param);
 
-                var dir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                LogHelper.WriteText(Path.Combine(dir, "log.txt"), string.Format("[{0}] {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),  param));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                LogWrite(ex.Message);
             }
             finally
             {
                 //Console.ReadLine();
                 Environment.Exit(0);
             }
-            
+
+        }
+
+        static void LogWrite(string msg)
+        {
+            LogHelper.WriteText(Path.Combine(dir, "log.txt"), string.Format("[{0}] {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), msg));
         }
     }
 }

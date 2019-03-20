@@ -1,20 +1,70 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MagnetCopyUI
 {
     internal class RegistryHelper
     {
         public static string addr = "Magnet";
-        public static string consoleExeFile = "MagnetCopy.exe";
+        public static string consoleExeFile = "MagnetCopyUI.exe";
 
-        public static void SetMagnet()
+        public static bool IsAdministrator()
         {
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
+
+            if (identity != null)
+            {
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+
+            return false;
+        }
+
+        public static void RunRunas()
+        {
+            ProcessStartInfo procInfo = new ProcessStartInfo();
+            procInfo.UseShellExecute = true;
+            procInfo.FileName = Application.ExecutablePath;
+            procInfo.WorkingDirectory = Environment.CurrentDirectory;
+            procInfo.Verb = "runas";
+            Process.Start(procInfo);
+            Application.Exit();
+        }
+
+
+
+
+        public static bool GetMagnet()
+        {
+            RegistryKey key = Registry.ClassesRoot.OpenSubKey(addr);
+            return key != null;
+        }
+
+        public static bool SetMagnet()
+        {
+            if (!IsAdministrator())
+            {
+                DialogResult result = MessageBox.Show("레지스트리 설정은 관리자 권한으로만 가능합니다. 관리자 권한으로 실행시키시겠습니까?\r\n레지스트리 설정 후에는 다시 사용자 권한으로 실행시켜주세요.", "관리자 권한 실행", MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes)
+                {
+                    RunRunas();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            
 
             string path = System.Windows.Forms.Application.StartupPath;
             bool exists = File.Exists(Path.Combine(path, consoleExeFile));
@@ -42,11 +92,23 @@ namespace MagnetCopyUI
             shellOpenCommand.SetValue("", pathParam);
 
             key.Close();
-
+            return true;
         }
 
-        public static void DeleteMagnet()
+        public static bool DeleteMagnet()
         {
+            if (!IsAdministrator())
+            {
+                DialogResult result = MessageBox.Show("레지스트리 설정은 관리자 권한으로만 가능합니다. 관리자 권한으로 실행시키시겠습니까?\r\n레지스트리 설정 후에는 다시 사용자 권한으로 실행시켜주세요.", "관리자 권한 실행", MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes)
+                {
+                    RunRunas();
+                }
+                else
+                {
+                    return false;
+                }
+            }
 
             RegistryKey key = Registry.ClassesRoot;
             if (key != null)
@@ -54,6 +116,8 @@ namespace MagnetCopyUI
                 key.DeleteSubKeyTree(addr);
                 key.Close();
             }
+
+            return true;
         }
     }
 }
