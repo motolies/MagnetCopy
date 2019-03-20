@@ -93,5 +93,11 @@ namespace MagnetCopyUI
             chkRegistry.Checked = RegistryHelper.GetMagnet();
             chkRegistry.CheckedChanged += chkRegistry_CheckedChanged;
         }
+
+        private void chkTopMost_CheckedChanged(object sender, EventArgs e)
+        {
+            var chk = sender as CheckBox;
+            this.TopMost = chk.Checked;
+        }
     }
 }

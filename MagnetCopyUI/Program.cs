@@ -38,9 +38,23 @@ namespace MagnetCopyUI
                 cds.cbData = buff.Length + 1;
                 cds.lpData = msg;
 
-                foreach(Process p in pro)
+                foreach (Process p in pro)
                     SendMessage(p.MainWindowHandle, WM_COPYDATA, 0, ref cds);
             }
+        }
+
+        static void RunProcess(string[] args, Mutex mutex)
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            MainForm main = new MainForm();
+            if (args.Length > 0)
+                main.ReceivedDataProcess(args[0]);
+
+            Application.Run(main);
+            mutex.ReleaseMutex();
+
         }
 
         /// <summary>
@@ -49,29 +63,20 @@ namespace MagnetCopyUI
         [STAThread]
         static void Main(string[] args)
         {
-            MainForm main;
-
             bool bnew;
             Mutex mutex = new Mutex(true, "MagnetCopyUI", out bnew);
 
             if (bnew)
-            {
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-
-                main = new MainForm();
-                if (args.Length > 0)
-                    main.ReceivedDataProcess(args[0]);
-
-                Application.Run(main);
-                mutex.ReleaseMutex();
-            }
+                RunProcess(args, mutex);
             else
             {
                 if (args.Length < 1)
                     return;
 
-                SendMessage(args[0]);
+                if (args[0] == "runas")
+                    RunProcess(new string[0], mutex);
+                else
+                    SendMessage(args[0]);
             }
         }
     }

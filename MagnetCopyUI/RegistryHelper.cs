@@ -13,8 +13,12 @@ namespace MagnetCopyUI
 {
     internal class RegistryHelper
     {
-        public static string addr = "Magnet";
-        public static string consoleExeFile = "MagnetCopyUI.exe";
+        static readonly string addr = "Magnet";
+        static readonly string consoleExeFile = "MagnetCopyUI.exe";
+        static readonly string msg = @"레지스트리 설정은 관리자 권한으로만 가능합니다.
+관리자 권한으로 실행시키시겠습니까?
+레지스트리 설정 후에는 다시 사용자 권한으로 실행시켜주세요.";
+
 
         public static bool IsAdministrator()
         {
@@ -34,10 +38,12 @@ namespace MagnetCopyUI
             ProcessStartInfo procInfo = new ProcessStartInfo();
             procInfo.UseShellExecute = true;
             procInfo.FileName = Application.ExecutablePath;
+            procInfo.Arguments = "runas";
             procInfo.WorkingDirectory = Environment.CurrentDirectory;
             procInfo.Verb = "runas";
-            Process.Start(procInfo);
+
             Application.Exit();
+            Process.Start(procInfo);
         }
 
 
@@ -53,7 +59,7 @@ namespace MagnetCopyUI
         {
             if (!IsAdministrator())
             {
-                DialogResult result = MessageBox.Show("레지스트리 설정은 관리자 권한으로만 가능합니다. 관리자 권한으로 실행시키시겠습니까?\r\n레지스트리 설정 후에는 다시 사용자 권한으로 실행시켜주세요.", "관리자 권한 실행", MessageBoxButtons.YesNo);
+                DialogResult result = MessageBox.Show(msg, "관리자 권한 실행", MessageBoxButtons.YesNo);
                 if (result == DialogResult.Yes)
                 {
                     RunRunas();
@@ -64,7 +70,7 @@ namespace MagnetCopyUI
                 }
             }
 
-            
+
 
             string path = System.Windows.Forms.Application.StartupPath;
             bool exists = File.Exists(Path.Combine(path, consoleExeFile));
@@ -99,7 +105,7 @@ namespace MagnetCopyUI
         {
             if (!IsAdministrator())
             {
-                DialogResult result = MessageBox.Show("레지스트리 설정은 관리자 권한으로만 가능합니다. 관리자 권한으로 실행시키시겠습니까?\r\n레지스트리 설정 후에는 다시 사용자 권한으로 실행시켜주세요.", "관리자 권한 실행", MessageBoxButtons.YesNo);
+                DialogResult result = MessageBox.Show(msg, "관리자 권한 실행", MessageBoxButtons.YesNo);
                 if (result == DialogResult.Yes)
                 {
                     RunRunas();
