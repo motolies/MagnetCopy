@@ -138,5 +138,11 @@ namespace MagnetCopyUI
             var chk = sender as CheckBox;
             this.TopMost = chk.Checked;
         }
+
+        private void btnReset_Click(object sender, EventArgs e)
+        {
+            magnetList.Clear();
+            richTextBox1.Text = string.Empty;
+        }
     }
 }

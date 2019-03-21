@@ -31,8 +31,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.plHeader = new System.Windows.Forms.Panel();
-            this.chkRegistry = new System.Windows.Forms.CheckBox();
             this.chkTopMost = new System.Windows.Forms.CheckBox();
+            this.chkRegistry = new System.Windows.Forms.CheckBox();
+            this.btnReset = new System.Windows.Forms.Button();
             this.plHeader.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,6 +50,7 @@
             // 
             // plHeader
             // 
+            this.plHeader.Controls.Add(this.btnReset);
             this.plHeader.Controls.Add(this.chkTopMost);
             this.plHeader.Controls.Add(this.chkRegistry);
             this.plHeader.Dock = System.Windows.Forms.DockStyle.Top;
@@ -56,17 +58,6 @@
             this.plHeader.Name = "plHeader";
             this.plHeader.Size = new System.Drawing.Size(384, 48);
             this.plHeader.TabIndex = 1;
-            // 
-            // chkRegistry
-            // 
-            this.chkRegistry.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.chkRegistry.AutoSize = true;
-            this.chkRegistry.Location = new System.Drawing.Point(278, 16);
-            this.chkRegistry.Name = "chkRegistry";
-            this.chkRegistry.Size = new System.Drawing.Size(94, 16);
-            this.chkRegistry.TabIndex = 0;
-            this.chkRegistry.Text = "Magnet 등록";
-            this.chkRegistry.UseVisualStyleBackColor = true;
             // 
             // chkTopMost
             // 
@@ -79,6 +70,27 @@
             this.chkTopMost.Text = "항상 위";
             this.chkTopMost.UseVisualStyleBackColor = true;
             this.chkTopMost.CheckedChanged += new System.EventHandler(this.chkTopMost_CheckedChanged);
+            // 
+            // chkRegistry
+            // 
+            this.chkRegistry.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkRegistry.AutoSize = true;
+            this.chkRegistry.Location = new System.Drawing.Point(278, 16);
+            this.chkRegistry.Name = "chkRegistry";
+            this.chkRegistry.Size = new System.Drawing.Size(94, 16);
+            this.chkRegistry.TabIndex = 0;
+            this.chkRegistry.Text = "Magnet 등록";
+            this.chkRegistry.UseVisualStyleBackColor = true;
+            // 
+            // btnReset
+            // 
+            this.btnReset.Location = new System.Drawing.Point(12, 13);
+            this.btnReset.Name = "btnReset";
+            this.btnReset.Size = new System.Drawing.Size(75, 23);
+            this.btnReset.TabIndex = 2;
+            this.btnReset.Text = "초기화";
+            this.btnReset.UseVisualStyleBackColor = true;
+            this.btnReset.Click += new System.EventHandler(this.btnReset_Click);
             // 
             // MainForm
             // 
@@ -105,6 +117,7 @@
         private System.Windows.Forms.Panel plHeader;
         private System.Windows.Forms.CheckBox chkRegistry;
         private System.Windows.Forms.CheckBox chkTopMost;
+        private System.Windows.Forms.Button btnReset;
     }
 }
 
