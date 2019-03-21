@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,6 +15,11 @@ namespace MagnetCopyUI
 {
     public partial class MainForm : Form
     {
+
+        static readonly string Dir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+        static readonly string RegApp = "MagnetRegistry.exe";
+
+
         List<string> magnetList = new List<string>();
 
 
@@ -64,27 +71,59 @@ namespace MagnetCopyUI
             InitializeComponent();
         }
 
+        public static bool RunRunasRegistry(string param, out string result)
+        {
+            ProcessStartInfo procInfo = new ProcessStartInfo();
+            procInfo.UseShellExecute = true;
+            procInfo.FileName = Path.Combine(Dir, RegApp);
+            procInfo.Arguments = param;
+            procInfo.WorkingDirectory = Environment.CurrentDirectory;
+            procInfo.Verb = "runas";
+
+            Process p = new Process();
+            p.StartInfo = procInfo;
+
+            try
+            {
+                p.Start();
+                result = p.StandardOutput.ReadToEnd();
+                return true;
+            }
+            catch (Exception x)
+            {
+                result = x.Message;
+                return false;
+            }
+            finally
+            {
+                //Wait for the process to end.
+                p.WaitForExit();
+                p.Close();
+            }
+
+        }
+
         private void chkRegistry_CheckedChanged(object sender, EventArgs e)
         {
-            bool result = false;
-
+            string result = string.Empty;
             var chk = sender as CheckBox;
 
             if (chk.Checked)
             {
-                result = RegistryHelper.SetMagnet();
+                DialogResult dialog = MessageBox.Show("Magnet Link를 레지스트리에 등록하기 위해서는 관리자 권한이 필요합니다. 계속 진행하시겠습니까?", "권한요청", MessageBoxButtons.YesNo);
+                if(dialog == DialogResult.Yes)
+                    RunRunasRegistry("install", out result);
             }
             else
             {
-                result = RegistryHelper.DeleteMagnet();
+                DialogResult dialog = MessageBox.Show("Magnet Link를 레지스트리에서 삭제하기 위해서는 관리자 권한이 필요합니다. 계속 진행하시겠습니까?", "권한요청", MessageBoxButtons.YesNo);
+                if (dialog == DialogResult.Yes)
+                    RunRunasRegistry("uninstall", out result);
             }
 
-            if (!result)
-            {
-                chkRegistry.CheckedChanged -= chkRegistry_CheckedChanged;
-                chkRegistry.Checked = !chkRegistry.Checked;
-                chkRegistry.CheckedChanged += chkRegistry_CheckedChanged;
-            }
+            chkRegistry.CheckedChanged -= chkRegistry_CheckedChanged;
+            chkRegistry.Checked = RegistryHelper.GetMagnet();
+            chkRegistry.CheckedChanged += chkRegistry_CheckedChanged;
 
         }
 

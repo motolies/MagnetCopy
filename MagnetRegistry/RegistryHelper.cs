@@ -7,19 +7,22 @@ using System.Linq;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace MagnetCopyUI
+
+namespace MagnetRegistry
 {
     internal class RegistryHelper
     {
+        static readonly string Dir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+        static readonly string AppExe = System.AppDomain.CurrentDomain.FriendlyName;
+
+
         static readonly string addr = "Magnet";
         static readonly string consoleExeFile = "MagnetCopyUI.exe";
         static readonly string msg = @"레지스트리 설정은 관리자 권한으로만 가능합니다.
-관리자 권한으로 실행시키시겠습니까?
-레지스트리 설정 후에는 다시 사용자 권한으로 실행시켜주세요.";
+관리자 권한으로 실행시키시겠습니까? [Y/n]";
 
-        [ObsoleteAttribute("이 프로젝트는 더이상 관리자 권한을 체크하지 않습니다.", true)]
+
         public static bool IsAdministrator()
         {
             WindowsIdentity identity = WindowsIdentity.GetCurrent();
@@ -33,19 +36,20 @@ namespace MagnetCopyUI
             return false;
         }
 
-        [ObsoleteAttribute("이 프로젝트는 더이상 관리자 권한을 체크하지 않습니다.", true)]
-        public static void RunRunas()
+        public static void RunRunas(string param)
         {
             ProcessStartInfo procInfo = new ProcessStartInfo();
             procInfo.UseShellExecute = true;
-            procInfo.FileName = Application.ExecutablePath;
-            procInfo.Arguments = "runas";
+            procInfo.FileName = Path.Combine(Dir, AppExe);
+            procInfo.Arguments = param;
             procInfo.WorkingDirectory = Environment.CurrentDirectory;
             procInfo.Verb = "runas";
 
-            Application.Exit();
             Process.Start(procInfo);
         }
+
+
+
 
         public static bool GetMagnet()
         {
@@ -53,25 +57,28 @@ namespace MagnetCopyUI
             return key != null;
         }
 
-        [ObsoleteAttribute("MagnetRegistry 프로젝트로 이전되었습니다.", true)]
-        public static bool SetMagnet()
+        public static string SetMagnet()
         {
             if (!IsAdministrator())
             {
-                DialogResult result = MessageBox.Show(msg, "관리자 권한 실행", MessageBoxButtons.YesNo);
-                if (result == DialogResult.Yes)
-                    RunRunas();
+                Console.WriteLine(msg);
+                string result = Console.ReadLine();
+                if (result.ToLower() == "y")
+                {
+                    RunRunas("install");
+                }
                 else
-                    return false;
+                {
+                    return "false";
+                }
             }
 
-            string path = System.Windows.Forms.Application.StartupPath;
-            bool exists = File.Exists(Path.Combine(path, consoleExeFile));
+            bool exists = File.Exists(Path.Combine(Dir, consoleExeFile));
 
             if (!exists)
                 throw new Exception("MagnetCopy.exe 파일을 찾을 수 없습니다. MagnetCopyUI.exe 파일과 같은 폴더에 넣어주세요.");
 
-            string pathParam = string.Format("\"{0}\\{1}\" \"%L\"", path, consoleExeFile);
+            string pathParam = string.Format("\"{0}\\{1}\" \"%L\"", Dir, consoleExeFile);
 
             RegistryKey key = Registry.ClassesRoot.CreateSubKey(addr, RegistryKeyPermissionCheck.ReadWriteSubTree);
             key.SetValue("", "");
@@ -91,19 +98,23 @@ namespace MagnetCopyUI
             shellOpenCommand.SetValue("", pathParam);
 
             key.Close();
-            return true;
+            return "true";
         }
 
-        [ObsoleteAttribute("MagnetRegistry 프로젝트로 이전되었습니다.", true)]
-        public static bool DeleteMagnet()
+        public static string DeleteMagnet()
         {
             if (!IsAdministrator())
             {
-                DialogResult result = MessageBox.Show(msg, "관리자 권한 실행", MessageBoxButtons.YesNo);
-                if (result == DialogResult.Yes)
-                    RunRunas();
+                Console.WriteLine(msg);
+                string result = Console.ReadLine();
+                if (result.ToLower() == "y")
+                {
+                    RunRunas("uninstall");
+                }
                 else
-                    return false;
+                {
+                    return "false";
+                }
             }
 
             RegistryKey key = Registry.ClassesRoot;
@@ -113,7 +124,7 @@ namespace MagnetCopyUI
                 key.Close();
             }
 
-            return true;
+            return "true";
         }
     }
 }
