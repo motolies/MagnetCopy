@@ -51,4 +51,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(TargetDir)*.*" "$(SolutionDir)$(OutDir)" /Y /S
+echo "$(SolutionDir)$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
