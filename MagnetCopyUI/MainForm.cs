@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -57,14 +58,53 @@ namespace MagnetCopyUI
 
         public void ReceivedDataProcess(string data)
         {
+            int cnt = magnetList.Count;
+
             // 데이터 받으면 처리할 부분
             magnetList.Add(data);
             magnetList = magnetList.Distinct().ToList();
 
-            //중복 제거 후 화면에 출력
-            string text = string.Join("\r\n", magnetList);
-            richTextBox1.Text = text;
+
+            bool isTopForm = this.TopMost;
+            this.TopMost = true;
+            this.TopMost = isTopForm;
+
+
+            //if (cnt < magnetList.Count)
+            {
+             
+                // 화면 업데이트
+                ChangeDataGridViewBindingList();
+
+                // 방금 들어온거 선택
+                DataGridViewRow row = dataGridView1.Rows.Cast<DataGridViewRow>().Where(r => r.Cells["Value"].Value.ToString().Equals(data)).First();
+                dataGridView1.Rows[row.Index].Selected = true;
+                dataGridView1.FirstDisplayedScrollingRowIndex = row.Index;
+
+            }
+
         }
+
+
+        private void ChangeDataGridViewBindingList()
+        {
+            Color color = plHeader.BackColor;
+            plHeader.BackColor = Color.Red;
+            Application.DoEvents();
+
+
+            // 다시 바인딩
+            dataGridView1.DataSource = magnetList.Select(x => new { Value = x }).ToList();
+            dataGridView1.Show();
+
+            // 갯수 업데이트랑
+            this.Text = string.Format("MagnetCopyUI ({0:n0})", magnetList.Count);
+
+            Thread.Sleep(20);
+            plHeader.BackColor = color;
+
+        }
+
 
         public MainForm()
         {
@@ -111,7 +151,7 @@ namespace MagnetCopyUI
             if (chk.Checked)
             {
                 DialogResult dialog = MessageBox.Show("Magnet Link를 레지스트리에 등록하기 위해서는 관리자 권한이 필요합니다. 계속 진행하시겠습니까?", "권한요청", MessageBoxButtons.YesNo);
-                if(dialog == DialogResult.Yes)
+                if (dialog == DialogResult.Yes)
                     RunRunasRegistry("install", out result);
             }
             else
@@ -142,7 +182,13 @@ namespace MagnetCopyUI
         private void btnReset_Click(object sender, EventArgs e)
         {
             magnetList.Clear();
-            richTextBox1.Text = string.Empty;
+            ChangeDataGridViewBindingList();
+        }
+
+        private void btnCopy_Click(object sender, EventArgs e)
+        {
+            string text = string.Join("\r\n", magnetList);
+            Clipboard.SetText(text);
         }
     }
 }
